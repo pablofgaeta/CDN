@@ -94,6 +94,25 @@ Element.prototype.enableToggleButton = function(stateList) {
         this.style.backgroundColor = stateList[cursor].color;
     });
 }
+
+function autoExpand(field) {
+    console.log(field);
+	// Reset field height
+	field.style.height = 'inherit';
+
+	// Get the computed styles for the element
+	var computed = window.getComputedStyle(field);
+
+	// Calculate the height
+	var height = parseInt(computed.getPropertyValue('border-top-width'), 10)
+	             + parseInt(computed.getPropertyValue('padding-top'), 10)
+	             + field.scrollHeight
+	             + parseInt(computed.getPropertyValue('padding-bottom'), 10)
+	             + parseInt(computed.getPropertyValue('border-bottom-width'), 10);
+
+	field.style.height = height + 'px';
+};
+
  
 function InputField(titleName, initVal, validators, callback, buttonName = 'Submit', rejectCallback = function(v) {}) {
     let VALID = true;
@@ -102,22 +121,25 @@ function InputField(titleName, initVal, validators, callback, buttonName = 'Subm
     let invalidInputColor = Styles.red + 'cc';
 
     let container = document.createElement('div');
-    container.className = 'flex-container-center';
+    container.className = 'flex-container flex-dir-down flex-center';
 
     let input_container = document.createElement('div');
-    input_container.className = 'flex-container-center';
+    input_container.className = 'flex-container flex-dir-down flex-center';
     input_container.style.width = '100%';
 
     let title = document.createElement('div');
-    title.className = 'txt-s gray base-text';
+    title.className = 'txt-sm gray base-text';
     title.width = '100%';
     title.innerHTML = titleName;
 
     let input = document.createElement('input');
-    input.className = 'input white';
+    input.className = 'input-l white';
     input.style.backgroundColor = validInputColor;
+    input.style.minHeight = '5em';
+    input.style.maxHeight = '50vh';
     input.value = initVal;
-    input.oninput = function() {
+    input.addEventListener('input', function(e) {
+        autoExpand(input);
         let val = input.value.trim();
         let discovered = false;
         validators.forEach( function(regex) {
@@ -131,7 +153,7 @@ function InputField(titleName, initVal, validators, callback, buttonName = 'Subm
             VALID = false;
             input.style.backgroundColor = invalidInputColor;
         }
-    }
+    });
 
     let submit = document.createElement('button');
     submit.innerHTML = buttonName;
